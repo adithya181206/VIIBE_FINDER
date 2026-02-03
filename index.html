@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nearby Vibe Finder</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+:root{
+  --primary:#2563eb;
+  --secondary:#22c55e;
+  --danger:#ef4444;
+  --bg:#f1f5f9;
+  --card:#ffffffcc;
+  --text:#0f172a;
+  --border:#e5e7eb;
+  --shadow:0 18px 40px rgba(0,0,0,.12);
+}
+
+body.dark-mode{
+  --bg:#020617;
+  --card:#111827dd;
+  --text:#f8fafc;
+  --border:#1f2937;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Outfit',sans-serif;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top left,#60a5fa55,transparent 45%),
+    radial-gradient(circle at bottom right,#4ade8055,transparent 45%),
+    var(--bg);
+  display:flex;
+  justify-content:center;
+  padding:20px;
+  color:var(--text);
+}
+
+.container{
+  width:100%;
+  max-width:680px;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+header h1{
+  font-size:2.3rem;
+  font-weight:800;
+}
+
+header span{ color:var(--primary); }
+
+.theme-toggle{
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--card);
+  cursor:pointer;
+  font-weight:700;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(14px);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+}
+
+/* FORM */
+label{
+  font-size:.7rem;
+  font-weight:800;
+  color:#64748b;
+  margin:14px 0 6px;
+  text-transform:uppercase;
+  display:block;
+}
+
+input, select{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+}
+
+/* LOCATION AUTOCOMPLETE */
+.location-wrapper{
+  position:relative;
+}
+
+.suggestions{
+  position:absolute;
+  top:100%;
+  left:0;
+  right:0;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-top:4px;
+  max-height:220px;
+  overflow-y:auto;
+  box-shadow:var(--shadow);
+  z-index:9999;
+}
+
+.suggestions div{
+  padding:10px 14px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.suggestions div:hover{
+  background:var(--primary);
+  color:white;
+}
+
+/* MOODS */
+.moods{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.mood-btn{
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:transparent;
+  cursor:pointer;
+  font-weight:700;
+  font-size:.8rem;
+}
+
+.mood-btn.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+
+/* BUTTONS */
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.btn{
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+  color:#fff;
+}
+
+.btn-primary{ background:var(--secondary); }
+.btn-danger{ background:var(--danger); }
+
+/* MAP */
+#map{
+  height:260px;
+  margin:20px 0;
+  border-radius:20px;
+  box-shadow:var(--shadow);
+}
+
+/* RESULTS */
+.place-card{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  border-radius:14px;
+  background:var(--card);
+  border:1px solid var(--border);
+  margin-bottom:10px;
+  cursor:pointer;
+}
+
+.dist-tag{
+  background:var(--text);
+  color:white;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:800;
+}
+
+/* STATUS */
+.loader, .message{
+  display:none;
+  text-align:center;
+  font-weight:800;
+  margin:12px 0;
+}
+
+.message{
+  background:var(--primary);
+  color:white;
+  padding:10px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <h1>Find your <span>Vibe.</span></h1>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+</header>
+
+<div class="card">
+
+  <!-- LOCATION WITH AUTOCOMPLETE -->
+  <label>📍 Location</label>
+  <div class="location-wrapper">
+    <input id="manualLoc" placeholder="Start typing a place..." autocomplete="off">
+    <div id="suggestions" class="suggestions"></div>
+  </div>
+
+  <button class="btn btn-primary" style="margin-top:10px" onclick="useMyLocation()">
+    Use My Location
+  </button>
+
+  <label>Mood Presets</label>
+  <div class="moods">
+    <button class="mood-btn active" onclick="setMood(this,'catering.cafe')">Work</button>
+    <button class="mood-btn" onclick="setMood(this,'catering.fast_food')">Quick Bite</button>
+    <button class="mood-btn" onclick="setMood(this,'catering.restaurant')">Date</button>
+    <button class="mood-btn" onclick="setMood(this,'healthcare.hospital')">Emergency</button>
+  </div>
+
+  <label>Custom Search</label>
+  <input id="manualMood" placeholder="Pizza, Gym, Park..." />
+
+  <label>Radius</label>
+  <select id="rad">
+    <option value="5000">5 KM</option>
+    <option value="10000">10 KM</option>
+    <option value="20000">20 KM</option>
+  </select>
+
+  <div class="actions">
+    <button class="btn btn-primary" style="flex:2" onclick="handleSearch()">Explore</button>
+    <button class="btn btn-danger" style="flex:1" onclick="clearSearch()">Clear</button>
+  </div>
+
+</div>
+
+<div id="map"></div>
+
+<select id="sortBy" onchange="handleSearch()">
+  <option value="distance">Sort by Distance</option>
+</select>
+
+<div id="message" class="message"></div>
+<div id="loader" class="loader">Finding places…</div>
+<div id="results"></div>
+
+</div>
+
+<!-- JS -->
+<script src="./app.js"></script>
+</body>
+</html>
