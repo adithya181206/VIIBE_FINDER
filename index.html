@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nearby Vibe Finder</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -107,7 +105,6 @@ input, select{
   color:var(--text);
 }
 
-/* LOCATION AUTOCOMPLETE */
 .location-wrapper{
   position:relative;
 }
@@ -138,7 +135,6 @@ input, select{
   color:white;
 }
 
-/* MOODS */
 .moods{
   display:flex;
   flex-wrap:wrap;
@@ -161,7 +157,6 @@ input, select{
   border-color:var(--primary);
 }
 
-/* BUTTONS */
 .actions{
   display:flex;
   gap:10px;
@@ -180,7 +175,6 @@ input, select{
 .btn-primary{ background:var(--secondary); }
 .btn-danger{ background:var(--danger); }
 
-/* MAP */
 #map{
   height:260px;
   margin:20px 0;
@@ -188,7 +182,6 @@ input, select{
   box-shadow:var(--shadow);
 }
 
-/* RESULTS */
 .place-card{
   display:flex;
   justify-content:space-between;
@@ -210,7 +203,6 @@ input, select{
   font-weight:800;
 }
 
-/* STATUS */
 .loader, .message{
   display:none;
   text-align:center;
@@ -238,7 +230,6 @@ input, select{
 
 <div class="card">
 
-  <!-- LOCATION WITH AUTOCOMPLETE -->
   <label>📍 Location</label>
   <div class="location-wrapper">
     <input id="manualLoc" placeholder="Start typing a place..." autocomplete="off">
@@ -286,7 +277,6 @@ input, select{
 
 </div>
 
-<!-- JS -->
 <script src="./app.js"></script>
 </body>
 </html>

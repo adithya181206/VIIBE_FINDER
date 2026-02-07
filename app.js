@@ -1,19 +1,14 @@
-// ===============================
-// CONFIGURATION & KEYS
-// ===============================
+
 const GEOAPIFY_KEY = "e53550b28f404a01a6f6a011894082cd";
 const WEATHER_KEY = "c1f45b062f5cac3103d3d11c41e70536";
 
 let map, marker;
-let userLat = 17.3850; // Default: Hyderabad
+let userLat = 17.3850; 
 let userLon = 78.4867;
 let currentMood = "catering.cafe";
 let savedPlaces = JSON.parse(localStorage.getItem("savedPlaces")) || [];
 let isLoading = false;
 
-// ===============================
-// SMART MOOD MAPPER
-// ===============================
 const moodMapper = {
     park: "leisure.park",
     gym: "activity.sport.gym",
@@ -32,16 +27,10 @@ const moodMapper = {
     temple: "amenity.place_of_worship"
 };
 
-// ===============================
-// THEME
-// ===============================
 function toggleTheme() {
     document.body.classList.toggle("dark-mode");
 }
 
-// ===============================
-// INITIAL LOCATION
-// ===============================
 navigator.geolocation.getCurrentPosition(
     pos => {
         userLat = pos.coords.latitude;
@@ -54,9 +43,6 @@ navigator.geolocation.getCurrentPosition(
     }
 );
 
-// ===============================
-// MAP LOGIC
-// ===============================
 function initMap(lat, lon) {
     if (!map) {
         map = L.map("map").setView([lat, lon], 14);
@@ -85,9 +71,6 @@ function updateMarker(lat, lon) {
     }).addTo(map);
 }
 
-// ===============================
-// WEATHER
-// ===============================
 async function getWeather(lat, lon) {
     try {
         const res = await fetch(
@@ -100,9 +83,6 @@ async function getWeather(lat, lon) {
     }
 }
 
-// ===============================
-// LOCATION BUTTON
-// ===============================
 function useMyLocation() {
     navigator.geolocation.getCurrentPosition(
         pos => {
@@ -115,9 +95,6 @@ function useMyLocation() {
     );
 }
 
-// ===============================
-// MOOD HANDLER
-// ===============================
 function setMood(btn, mood) {
     document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
@@ -125,18 +102,12 @@ function setMood(btn, mood) {
     document.getElementById("manualMood").value = "";
 }
 
-// ===============================
-// CLEAR SEARCH
-// ===============================
 function clearSearch() {
     document.getElementById("manualLoc").value = "";
     document.getElementById("manualMood").value = "";
     document.getElementById("results").innerHTML = "";
 }
 
-// ===============================
-// MAIN SEARCH
-// ===============================
 async function handleSearch() {
     if (isLoading) return;
     isLoading = true;
@@ -152,7 +123,6 @@ async function handleSearch() {
 
     let lat = userLat, lon = userLon;
 
-    // Manual location geocode
     if (locInput && locInput !== "Selected on Map" && locInput !== "Current Location") {
         try {
             const geoRes = await fetch(
@@ -169,13 +139,11 @@ async function handleSearch() {
         }
     }
 
-    // Weather
     const weather = await getWeather(lat, lon);
     if (weather?.weather?.[0]?.main === "Rain") {
         showMessage("🌧️ It's raining. Indoor places are recommended.");
     }
 
-    // Category logic
     let category = currentMood;
     let textParam = "";
 
@@ -203,9 +171,6 @@ async function handleSearch() {
     isLoading = false;
 }
 
-// ===============================
-// RENDER RESULTS
-// ===============================
 function renderResults(features) {
     const container = document.getElementById("results");
     container.innerHTML = "";
@@ -244,9 +209,6 @@ function renderResults(features) {
     });
 }
 
-// ===============================
-// SAVE PLACE
-// ===============================
 function savePlace(name) {
     if (!savedPlaces.includes(name)) {
         savedPlaces.push(name);
@@ -257,9 +219,6 @@ function savePlace(name) {
     }
 }
 
-// ===============================
-// UTILITIES
-// ===============================
 function openDirections(lat, lon) {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`);
 }
@@ -271,9 +230,6 @@ function showMessage(msg) {
     box.style.display = "block";
     setTimeout(() => box.style.display = "none", 3000);
 }
-// ===============================
-// LOCATION AUTOCOMPLETE
-// ===============================
 const locInput = document.getElementById("manualLoc");
 const suggestionsBox = document.getElementById("suggestions");
 
@@ -323,8 +279,6 @@ function showSuggestions(features) {
         suggestionsBox.appendChild(div);
     });
 }
-
-// Hide suggestions when clicking outside
 document.addEventListener("click", e => {
     if (!e.target.closest(".suggestions") && e.target !== locInput) {
         suggestionsBox.innerHTML = "";
